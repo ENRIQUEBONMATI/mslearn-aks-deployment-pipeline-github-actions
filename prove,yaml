@@ -1,0 +1,62 @@
+apiVersion: apps/vq  //Nombramos la api
+kind: Deployment  //Tipo de despliegue
+metadata:  /// Mierdas de la metadata
+  name: ship-manager-backend
+  namespace. defauld
+ spec:
+    replicas: 1
+    selector:
+      matchlabels:
+        app: ship-manager-backend  //Confoguracion del despliegeue (Nombre de la imagen, puertos ...)
+       template:
+         metadata:
+          labels:
+          app: ship-manager-backend
+         spec:
+          containers:
+           - image: mcr.microsoft.com/mslearn/samples/contoso-ship-manager:backend
+             namw: ship-manager-backend
+             ports:  //Contenedores y sus respectivos nombres
+              - containerPort: 3000
+                 name: http
+             env:
+              - name: DATABASE_MONGODB_URI
+                valueFrom:
+                  secretKeyRef:
+                      key: database_mongodb_uri
+                      name: ship-manager-backend
+                name: DATABASE_MONGODB_DBNAME
+                value: ship_manager
+   -----------------
+   
+   apiVersion: V1
+   kind: Service
+   metadata:
+      name: ship-manager-backend  //Aqui basicamente he definido el servicio
+      namespace: default
+   spec:
+    selector:
+      app: ship-manager-backend
+     port: 80
+     targetPort: 3000
+    ------
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: ship-manager-backend   // Aqui establecemos la conexión entre nodos
+      namespace: default
+      annotations:
+         kubernetes.io/ingress.class: addon-http-application-routing
+       spec:
+        rules:
+            - host: ship-manager-backend.example.com
+              http:
+                paths:
+                 - path: /
+                 pathType: Prefix
+                 backend:
+                    service:
+                        name: ship-manager-backend
+                        port:
+                          nmae:http
+                 
